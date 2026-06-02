@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Smart Traffic Signal Optimization</title>
+
+<style>
+
+body{
+    font-family: Arial, sans-serif;
+    background:#f4f4f4;
+    text-align:center;
+    padding:20px;
+}
+
+h1{
+    color:#333;
+}
+
+button{
+    padding:12px 20px;
+    margin:8px;
+    border:none;
+    border-radius:8px;
+    background:#007bff;
+    color:white;
+    font-size:16px;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#0056b3;
+}
+
+input{
+    padding:10px;
+    margin:10px;
+    width:220px;
+    font-size:15px;
+}
+
+#output{
+    width:80%;
+    max-width:800px;
+    margin:20px auto;
+    background:white;
+    padding:20px;
+    border-radius:10px;
+    text-align:left;
+    box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
+
+hr{
+    margin:25px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>Smart Traffic Signal Optimization System</h1>
+
+<h3>Predefined Traffic Scenarios</h3>
+
+<button onclick="analyze('Low Traffic')">
+    Low Traffic
+</button>
+
+<button onclick="analyze('Medium Traffic')">
+    Medium Traffic
+</button>
+
+<button onclick="analyze('High Traffic')">
+    High Traffic
+</button>
+
+<button onclick="analyze('Emergency Vehicle')">
+    Emergency Vehicle
+</button>
+
+<hr>
+
+<h3>Custom Traffic Analysis</h3>
+
+<input
+type="number"
+id="vehicleInput"
+placeholder="Enter Vehicle Count">
+
+<input
+type="number"
+id="waitingInput"
+placeholder="Enter Waiting Time">
+
+<br>
+
+<button onclick="customAnalyze()">
+    Analyze Custom Traffic
+</button>
+
+<div id="output">
+
+<h3>Select a Scenario</h3>
+
+</div>
+
+<script>
+
+// ======================================
+// CO1 : STATE REPRESENTATION
+// ======================================
+
+const trafficData = {
+
+    "Low Traffic":{
+        vehicles:12,
+        waiting:8
+    },
+
+    "Medium Traffic":{
+        vehicles:35,
+        waiting:18
+    },
+
+    "High Traffic":{
+        vehicles:57,
+        waiting:31
+    },
+
+    "Emergency Vehicle":{
+        vehicles:20,
+        waiting:5
+    }
+
+};
+
+// ======================================
+// CO2 : GREEDY SEARCH
+// ======================================
+
+function greedySignal(priorityScore){
+
+    if(priorityScore > 120){
+        return 60;
+    }
+
+    else if(priorityScore > 60){
+        return 40;
+    }
+
+    else{
+        return 20;
+    }
+}
+
+// ======================================
+// CO3 : CONSTRAINT CHECKING
+// ======================================
+
+function constraintCheck(signalTime){
+
+    if(signalTime <= 60){
+        return "✓ Signal Time Constraint Satisfied";
+    }
+
+    return "✗ Constraint Violated";
+}
+
+// ======================================
+// CO4 : DECISION MAKING AGENT
+// ======================================
+
+function analyze(state){
+
+    const data = trafficData[state];
+
+    const vehicles = data.vehicles;
+    const waiting = data.waiting;
+
+    const priorityScore =
+    (vehicles * 2) + waiting;
+
+    let signalTime;
+    let decision;
+
+    if(state === "Emergency Vehicle"){
+
+        signalTime = 60;
+
+        decision =
+        "Emergency Override Activated";
+    }
+
+    else{
+
+        signalTime =
+        greedySignal(priorityScore);
+
+        if(signalTime === 60){
+
+            decision =
+            "Heavy Congestion Detected";
+        }
+
+        else if(signalTime === 40){
+
+            decision =
+            "Moderate Traffic Flow";
+        }
+
+        else{
+
+            decision =
+            "Normal Traffic Flow";
+        }
+    }
+
+    let nextState;
+
+    if(state === "Low Traffic"){
+
+        nextState = "Medium Traffic";
+    }
+
+    else if(state === "Medium Traffic"){
+
+        nextState = "High Traffic";
+    }
+
+    else if(state === "High Traffic"){
+
+        nextState = "Emergency Vehicle";
+    }
+
+    else{
+
+        nextState = "Normal Traffic";
+    }
+
+    document.getElementById("output").innerHTML = `
+
+    <h2>${state}</h2>
+
+    <h3>Traffic Data</h3>
+
+    <p><b>Vehicle Count:</b> ${vehicles}</p>
+
+    <p><b>Waiting Time:</b> ${waiting}</p>
+
+    <h3>AI Reasoning</h3>
+
+    <p><b>Priority Score:</b>
+    (${vehicles} × 2) + ${waiting}
+    = ${priorityScore}</p>
+
+    <h3>Decision</h3>
+
+    <p>${decision}</p>
+
+    <h3>Greedy Search Result</h3>
+
+    <p>
+    Selected Signal Time :
+    ${signalTime} seconds
+    </p>
+
+    <h3>Constraint Satisfaction</h3>
+
+    <p>
+    ${constraintCheck(signalTime)}
+    </p>
+
+    <h3>State Transition</h3>
+
+    <p>
+    ${state} → ${nextState}
+    </p>
+
+    `;
+}
+
+// ======================================
+// CUSTOM USER INPUT
+// ======================================
+
+function customAnalyze(){
+
+    const vehicles =
+    Number(
+    document.getElementById(
+    "vehicleInput").value);
+
+    const waiting =
+    Number(
+    document.getElementById(
+    "waitingInput").value);
+
+    if(
+        isNaN(vehicles) ||
+        isNaN(waiting) ||
+        vehicles <= 0 ||
+        waiting < 0
+      ){
+
+        alert(
+        "Please enter valid values");
+
+        return;
+    }
+
+    let state;
+
+    if(vehicles > 50){
+
+        state = "High Traffic";
+    }
+
+    else if(vehicles > 25){
+
+        state = "Medium Traffic";
+    }
+
+    else{
+
+        state = "Low Traffic";
+    }
+
+    const priorityScore =
+    (vehicles * 2) + waiting;
+
+    const signalTime =
+    greedySignal(priorityScore);
+
+    document.getElementById("output")
+    .innerHTML = `
+
+    <h2>Custom Traffic Analysis</h2>
+
+    <h3>Traffic Classification</h3>
+
+    <p>
+    <b>Traffic Type:</b>
+    ${state}
+    </p>
+
+    <p>
+    <b>Vehicle Count:</b>
+    ${vehicles}
+    </p>
+
+    <p>
+    <b>Waiting Time:</b>
+    ${waiting}
+    </p>
+
+    <h3>AI Reasoning</h3>
+
+    <p>
+    Priority Score =
+    (${vehicles} × 2)
+    + ${waiting}
+    =
+    ${priorityScore}
+    </p>
+
+    <h3>Greedy Search Result</h3>
+
+    <p>
+    Selected Signal Time :
+    ${signalTime} seconds
+    </p>
+
+    <h3>Constraint Satisfaction</h3>
+
+    <p>
+    ${constraintCheck(signalTime)}
+    </p>
+
+    <h3>Reason</h3>
+
+    <p>
+    Traffic classified using
+    vehicle-count thresholds.
+    </p>
+
+    `;
+}
+
+</script>
+
+</body>
+
+</html>
